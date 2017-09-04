@@ -59,12 +59,13 @@ export const castFocus = () => {
 	if (!isActive) return;
 	const intersects = raycaster.intersectObjects(intersectableObjects, true);
 	if (intersects.length) {
-		document.body.classList.add('pointer'); 
 		if (focusedObject != intersects[0].object) {
 			if (focusedObject) focusedObject.onBlur();
 			focusedObject = intersects[0].object;
 			focusedObject.onFocus();
 		}
+		// console.log(intersects[0]);
+		intersects[0].object.onIntersect(intersects[0]);
 	} else {
 		document.body.classList.remove('pointer');
 		if (focusedObject) focusedObject.onBlur();
