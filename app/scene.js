@@ -35,7 +35,7 @@ export const init = () => {
 		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i });
 		f.lookAt(camera.position);
 		frames.push(f);
-		intersectableObjects.push(f);
+		intersectableObjects.push(f.frame);
 		scene.add(f);
 	}
 }

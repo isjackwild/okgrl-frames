@@ -29,6 +29,9 @@ class Frame extends THREE.Object3D {
 		this.width = 0;
 		this.height = 0;
 
+		this.shadow = null;
+		this.frame = null;
+
 		this.isDead = false;
 		this.isSelected = false;
 		this.isAnimating = false;
@@ -43,10 +46,11 @@ class Frame extends THREE.Object3D {
 		this.onAnimationComplete = this.onAnimationComplete.bind(this);
 
 		this.onResize();
-		this.setupMesh();
+		this.setupFrame();
+		this.setupShadow();
 	}
 
-	setupMesh() {
+	setupFrame() {
 		const geom = new THREE.BoxGeometry(this.width, this.height, 5);
 		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
 		const mesh = new THREE.Mesh(geom, material);
@@ -54,7 +58,27 @@ class Frame extends THREE.Object3D {
 		mesh.onFocus = this.onFocus;
 		mesh.onBlur = this.onBlur;
 		mesh.onIntersect = this.onIntersect;
-		this.add(mesh);
+		this.frame = mesh;
+		this.add(this.frame);
+	}
+
+	setupShadow() {
+		const geom = new THREE.PlaneGeometry(this.width * 1.1, this.height * 1.1, 1);
+		const texture = new THREE.TextureLoader().load('assets/shadow.png');
+		const material = new THREE.MeshBasicMaterial({
+			map: texture,
+			// color: 0xff0000,
+			transparent: true,
+			// wireframe: true,
+			depthWrite: false,
+			opacity: .3,
+			fog: false,
+		});
+		const mesh = new THREE.Mesh(geom, material);
+		mesh.position.x = this.width * -0.05;
+		mesh.position.y = this.width * -0.05;
+		this.shadow = mesh;
+		this.add(this.shadow);
 	}
 
 	onClick() {
