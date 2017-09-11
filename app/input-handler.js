@@ -10,6 +10,7 @@ export const ray = raycaster.ray;
 export const intersectableObjects = [];
 const zeroVec = new THREE.Vector2(0, 0);
 let focusedObject = null;
+window.selectedObject = null;
 let isActive = true;
 
 
@@ -64,7 +65,6 @@ export const castFocus = () => {
 			focusedObject = intersects[0].object;
 			focusedObject.onFocus();
 		}
-		// console.log(intersects[0]);
 		intersects[0].object.onIntersect(intersects[0]);
 	} else {
 		document.body.classList.remove('pointer');

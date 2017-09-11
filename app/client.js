@@ -27,7 +27,8 @@ const onResize = () => {
 }
 
 const addEventListeners = () => {
-	window.addEventListener('resize', _.throttle(onResize, 16.666));
+	window.addEventListener('resize', _.debounce(onResize, 111));
+	window.addEventListener('orientationchange', _.debounce(onResize, 111));
 }
 
 

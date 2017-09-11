@@ -4,7 +4,7 @@ import { init as initCamera, camera, onResize as onResizeCamera } from './camera
 import { init as initInputHandler } from './input-handler.js';
 
 let canvas;
-let raf, then, now, correction;
+let raf, then, now, correction, isFocused = true, isInit = false, isAnimating = false;
 let currentCamera, currentScene;
 export let renderer;
 
@@ -14,15 +14,32 @@ export const init = () => {
 	initCamera();
 	initScene();
 	initInputHandler();
+	window.addEventListener('focus', onFocus);
+	window.addEventListener('blur', onBlur);
 
 	currentCamera = camera;
 	currentScene = scene;
 	now = new Date().getTime();
 	animate();
+	isInit = true;
 }
 
 export const kill = () => {
 	cancelAnimationFrame(raf);
+	isAnimating = false;
+}
+
+const onFocus = () => {
+	if (!isInit || isAnimating) return;
+	isFocused = true;
+	animate();
+}
+
+const onBlur = () => {
+	isFocused = false;
+	cancelAnimationFrame(raf);
+	isAnimating = false;
+	then = now = correction = null;
 }
 
 const setupRenderer = () => {
@@ -45,6 +62,7 @@ const render = () => {
 }
 
 const animate = () => {
+	isAnimating = true;
 	then = now ? now : null;
 	now = new Date().getTime();
 	correction = then ? (now - then) / 16.666 : 1;
