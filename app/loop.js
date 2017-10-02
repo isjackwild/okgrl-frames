@@ -1,6 +1,6 @@
 const THREE = require('three');
-import { init as initScene, scene, update as updateScene } from './scene.js';
-import { init as initCamera, camera, onResize as onResizeCamera } from './camera.js';
+import { init as initScene, scene, hdrScene, update as updateScene } from './scene.js';
+import { init as initCamera, camera, cameraCube, onResize as onResizeCamera } from './camera.js';
 import { init as initInputHandler } from './input-handler.js';
 
 let canvas;
@@ -60,6 +60,7 @@ const update = (correction) => {
 const render = () => {
 	currentCamera.lookAt(currentScene.position);
 	renderer.render(currentScene, currentCamera);
+	cameraCube.updateCubeMap(renderer, hdrScene);
 }
 
 const animate = () => {

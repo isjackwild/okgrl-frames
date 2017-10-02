@@ -10,3 +10,5 @@ export const GEOM_SRCS = [
 export const FRAME_SRCS = [
 	'assets/frames/test/Rm_4.jpg',
 ];
+
+export const HDR_SRC = 'assets/HDR.jpg';

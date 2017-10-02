@@ -1,11 +1,11 @@
 const THREE = require('three');
 import _ from 'lodash';
 
-export let scene, boxMesh;
+export let scene, hdrScene, boxMesh;
 import { camera, visWidth, visHeight } from './camera.js';
 import { intersectableObjects } from './input-handler.js';
 import Frame from './Frame.js';
-import { WIND_Y_VELOCITY, FRAMES_COUNT } from './CONSTANTS.js';
+import { WIND_Y_VELOCITY, FRAMES_COUNT, HDR_SRC } from './CONSTANTS.js';
 
 const frames = [];
 
@@ -24,12 +24,21 @@ export const init = (framesObjects) => {
 	window.addEventListener('touchstart', onTouchStart);
 	window.addEventListener('touchend', onTouchEnd);
 	window.addEventListener('touchmove', onTouchMove);
+	hdrScene = new THREE.Scene();
 	scene = new THREE.Scene();
 	scene.add(camera);
 	// scene.add(new THREE.AmbientLight( 0xffffff ));
 	const spot = new THREE.SpotLight(0xffffff);
 	spot.position.set(visWidth * 0.4, visHeight * 1.2, camera.position.z);
 	scene.add(spot);
+
+	const skybox = new THREE.Mesh(
+		new THREE.SphereBufferGeometry(222, 12, 12),
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(HDR_SRC), side: THREE.BackSide })
+	);
+
+	hdrScene.add(skybox);
+	hdrScene.add(new THREE.AmbientLight( 0xffffff ));
 
 
 	for (let i = 0; i < FRAMES_COUNT; i++) {

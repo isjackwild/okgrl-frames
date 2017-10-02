@@ -1,6 +1,6 @@
 const THREE = require('three');
 import { TweenLite } from 'gsap';
-import { camera, visWidth, visHeight } from './camera.js';
+import { camera, cameraCube, visWidth, visHeight } from './camera.js';
 import { ray } from './input-handler.js';
 import { FRAME_SRCS } from './CONSTANTS.js';
 
@@ -81,6 +81,13 @@ class Frame extends THREE.Object3D {
 		this.frame.scale.set(this.width, this.width, this.width);
 		this.frame.rotation.z = Math.PI / 2;
 		this.surround.material.map = texture;
+		this.surround.material.envMap = cameraCube.renderTarget.texture;
+		// this.surround.material = new THREE.MeshLambertMaterial({
+		// 	envMap: cameraCube.renderTarget.texture,
+		// 	color: 0xFFFFFF,
+		// 	map: new THREE.TextureLoader().load(FRAME_SRCS[0]),
+		// });
+		this.plane.material.envMap = cameraCube.renderTarget.texture;
 
 		this.plane.material.side = THREE.DoubleSide;
 	}
