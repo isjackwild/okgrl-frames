@@ -21,7 +21,7 @@ export const init = () => {
 const addEventListeners = () => {
 	if (window.mobile) {
 		window.addEventListener('deviceorientation', _.throttle(onDeviceOrientation, 33.333));
-		// window.addEventListener('touchstart', onClick);
+		window.addEventListener('touchstart', onClick);
 	} else {
 		window.addEventListener('mousemove', _.throttle(onMouseMove, 16.666));
 		window.addEventListener('click', onClick);
@@ -34,6 +34,10 @@ const onMouseMove = ({ clientX, clientY }) => {
 	mouseVector.set(x, y, camera.position.z);
 	raycaster.setFromCamera(mouseVector, camera);
 	castFocus();
+}
+
+const onTouchMove = (e) => {
+	onMouseMove(e.touches[0]);
 }
 
 export const onDeviceOrientation = () => {

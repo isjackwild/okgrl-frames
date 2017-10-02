@@ -8,11 +8,11 @@ let raf, then, now, correction, isFocused = true, isInit = false, isAnimating = 
 let currentCamera, currentScene;
 export let renderer;
 
-export const init = () => {
+export const init = (frames) => {
 	canvas = document.getElementsByClassName('canvas')[0];
 	setupRenderer();
 	initCamera();
-	initScene();
+	initScene(frames);
 	initInputHandler();
 	window.addEventListener('focus', onFocus);
 	window.addEventListener('blur', onBlur);
@@ -46,8 +46,9 @@ const setupRenderer = () => {
 	renderer = new THREE.WebGLRenderer({
 		canvas,
 		antialias: true,
+		alpha: true,
 	});
-	renderer.setClearColor(0xffffff);
+	renderer.setClearColor(0xffffff, 0);
 	renderer.setPixelRatio(window.devicePixelRatio);
 	renderer.setSize(window.innerWidth, window.innerHeight);
 }

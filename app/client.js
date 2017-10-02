@@ -1,12 +1,18 @@
 const THREE = require('three');
 const dat = require('dat-gui');
+require('./vendor/ColladaLoader.js');
+
+export const textureLoader = new THREE.TextureLoader();
+export const colladaLoader = new THREE.ColladaLoader();
+
 
 import { init, renderer } from './loop.js';
 import { camera, onResize as onResizeCamera } from './camera.js';
+import { GEOM_SRCS } from './CONSTANTS.js';
 import _ from 'lodash';
 
 window.app = window.app || {};
-
+const loadedFrames = [];
 
 const kickIt = () => {
 	if (window.location.search.indexOf('debug') > -1) app.debug = true;
@@ -15,7 +21,17 @@ const kickIt = () => {
 	}
 	addEventListeners();
 	onResize();
-	init();
+
+	GEOM_SRCS.forEach(s => {
+		colladaLoader.load(s, onLoadedGeom);
+	});
+}
+
+const onLoadedGeom = (object) => {
+	const frame = object.scene.children;
+	loadedFrames.push(frame);
+
+	if (loadedFrames.length === GEOM_SRCS.length) init(loadedFrames);
 }
 
 const onResize = () => {
