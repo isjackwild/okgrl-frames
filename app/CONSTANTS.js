@@ -11,4 +11,8 @@ export const FRAME_SRCS = [
 	'assets/frames/test/Rm_4.jpg',
 ];
 
+export const PHOTO_SRCS = [
+	'assets/images/test/test-4.jpg',
+];
+
 export const HDR_SRC = 'assets/HDR.jpg';

@@ -27,14 +27,14 @@ export const init = (framesObjects) => {
 	hdrScene = new THREE.Scene();
 	scene = new THREE.Scene();
 	scene.add(camera);
-	// scene.add(new THREE.AmbientLight( 0xffffff ));
+	scene.add(new THREE.AmbientLight( 0xffffff, 0.33 ));
 	const spot = new THREE.SpotLight(0xffffff);
 	spot.position.set(visWidth * 0.4, visHeight * 1.2, camera.position.z);
 	scene.add(spot);
 
 	const skybox = new THREE.Mesh(
 		new THREE.SphereBufferGeometry(222, 12, 12),
-		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(HDR_SRC), side: THREE.BackSide })
+		new THREE.MeshBasicMaterial({ map: new THREE.TextureLoader().load(HDR_SRC, () => { window.hdrNeedsRender = true }), side: THREE.BackSide })
 	);
 
 	hdrScene.add(skybox);
@@ -44,11 +44,12 @@ export const init = (framesObjects) => {
 	for (let i = 0; i < FRAMES_COUNT; i++) {
 		let x = Math.random() * visWidth * 0.5;
 		if (i % 2 === 0) x -= visWidth * 0.5;
-		const y = (i * visHeight * 1.3 / FRAMES_COUNT) - (visHeight * 1.3 * 0.5);
-		const z = i % 2 ? -12 : -6 - Math.random() * 4;
+		const y = (i * visHeight * 1.6 / FRAMES_COUNT) - (visHeight * 1.6 * 0.5);
+		const z = i % 2 ? -18 : -5 - Math.random() * 4;
+		const renderOrder = i % 2 ? 1 : 2;
 
 		const model = framesObjects[Math.floor(Math.random() * framesObjects.length)];
-		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i, model  });
+		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i, model, renderOrder });
 		f.lookAt(camera.position);
 		frames.push(f);
 		intersectableObjects.push(f.inputListener);

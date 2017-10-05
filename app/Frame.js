@@ -2,12 +2,12 @@ const THREE = require('three');
 import { TweenLite } from 'gsap';
 import { camera, cameraCube, visWidth, visHeight } from './camera.js';
 import { ray } from './input-handler.js';
-import { FRAME_SRCS } from './CONSTANTS.js';
+import { FRAME_SRCS, PHOTO_SRCS } from './CONSTANTS.js';
 
 class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
-		const { position, index, model, aspectRatio } = args;
+		const { position, index, model, photo, aspectRatio, renderOrder } = args;
 
 		this.frame = new THREE.Object3D();
 		this.add(this.frame);
@@ -21,6 +21,9 @@ class Frame extends THREE.Object3D {
 
 		this.plane = this.getObjectByName("PLANE").children[0];
 		this.surround = this.getObjectByName("FRAME").children[0];
+
+		this._renderOrder = renderOrder;
+		this.renderOrder = renderOrder;
 
 		this.index = index;
 		this.position.copy(position);
@@ -67,7 +70,7 @@ class Frame extends THREE.Object3D {
 
 	setupFrame() {
 		const geom = new THREE.BoxGeometry(this.width, this.height, 5);
-		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true });
+		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true, visible: false });
 		const mesh = new THREE.Mesh(geom, material);
 		mesh.onClick = this.onClick;
 		mesh.onFocus = this.onFocus;
@@ -75,21 +78,31 @@ class Frame extends THREE.Object3D {
 		mesh.onIntersect = this.onIntersect;
 		this.inputListener = mesh;
 
-		const texture = new THREE.TextureLoader().load(FRAME_SRCS[0]);
-		
+		const frameTexture = new THREE.TextureLoader().load(FRAME_SRCS[0]);
+		const photoTexture = new THREE.TextureLoader().load(PHOTO_SRCS[0]);
+
 		this.add(mesh);
 		this.frame.scale.set(this.width, this.width, this.width);
 		this.frame.rotation.z = Math.PI / 2;
-		this.surround.material.map = texture;
-		this.surround.material.envMap = cameraCube.renderTarget.texture;
-		// this.surround.material = new THREE.MeshLambertMaterial({
-		// 	envMap: cameraCube.renderTarget.texture,
-		// 	color: 0xFFFFFF,
-		// 	map: new THREE.TextureLoader().load(FRAME_SRCS[0]),
-		// });
-		this.plane.material.envMap = cameraCube.renderTarget.texture;
 
-		this.plane.material.side = THREE.DoubleSide;
+		const frameMaterial = new THREE.MeshStandardMaterial({
+			color: 0xffffff,
+			map: frameTexture,
+			envMap: cameraCube.renderTarget.texture,
+			metalness: 0.6,
+			roughness: 0.4,
+		});
+		this.surround.material = frameMaterial;
+
+		const photoMaterial = new THREE.MeshStandardMaterial({
+			color: 0xffffff,
+			map: photoTexture,
+			envMap: cameraCube.renderTarget.texture,
+			side: THREE.DoubleSide,
+			metalness: 0,
+			roughness: 0,
+		});
+		this.plane.material = photoMaterial;
 	}
 
 	setupShadow() {
@@ -101,12 +114,13 @@ class Frame extends THREE.Object3D {
 			transparent: true,
 			// wireframe: true,
 			depthWrite: false,
-			opacity: .3,
+			opacity: .6,
 			fog: false,
 		});
 		const mesh = new THREE.Mesh(geom, material);
 		mesh.position.x = this.width * -0.05;
 		mesh.position.y = this.width * -0.08;
+		mesh.renderOrder = -1;
 		this.shadow = mesh;
 		this.add(this.shadow);
 	}
@@ -127,7 +141,7 @@ class Frame extends THREE.Object3D {
 	}
 
 	onResize() {
-		this.width = visWidth > visHeight ? visWidth * 0.3 : visWidth * 0.5;
+		this.width = visWidth > visHeight ? visWidth * 0.35 : visWidth * 0.45;
 		this.height = this.width * this.aspectRatio;
 	}
 	
@@ -150,6 +164,7 @@ class Frame extends THREE.Object3D {
 		this.isSelected = true;
 		this.backupRotation.copy(this.rotation);
 		this.shadow.material.side = THREE.DoubleSide;
+		this.renderOrder = 3;
 
 		const dist = (this.width * 0.4) / Math.tan(Math.PI * camera.fov / 360);
 
@@ -164,6 +179,7 @@ class Frame extends THREE.Object3D {
 		this.isAnimating = true;
 		this.isSelected = false;
 		this.shadow.material.side = THREE.DoubleSide;
+		this.renderOrder = this._renderOrder;
 
 		this.targetOffsetPosition.set(0, 0, 0);
 		this.currentOffsetPosition.set(0, 0, 0);
@@ -181,7 +197,7 @@ class Frame extends THREE.Object3D {
 	}
 
 	reposition() {
-		this.restPosition.y *= (-1 - (Math.random() * 0.33));
+		this.restPosition.y *= (-1 - (Math.random() * 0.5));
 		this.restPosition.x = Math.random() * visWidth * 0.5;
 		if (this.index % 2 === 0) this.restPosition.x -= visWidth * 0.5;
 	}
@@ -192,7 +208,7 @@ class Frame extends THREE.Object3D {
 
 			this.tmp.copy(
 				this.tmp.copy(camera.position)
-				.add(ray.direction.normalize().multiplyScalar(150))
+				.add(ray.direction.normalize().multiplyScalar(200))
 			);
 			this.lookAtTarget.add(
 				this.tmp.sub(this.lookAtTarget)
