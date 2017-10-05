@@ -20,7 +20,15 @@ class Frame extends THREE.Object3D {
 		this.aspectRatio = 0.6866;
 
 		this.plane = this.getObjectByName("PLANE").children[0];
-		this.surround = this.getObjectByName("FRAME").children[0];
+		const surround = this.getObjectByName("FRAME").children[0];
+
+		this.getObjectByName("FRAME").remove(surround);
+		const bufferGeom = new THREE.BufferGeometry().fromGeometry(surround.geometry);
+		this.surround = new THREE.Mesh(bufferGeom, surround.material);
+		this.getObjectByName("FRAME").add(this.surround);
+
+
+
 
 		this._renderOrder = renderOrder;
 		this.renderOrder = renderOrder;
@@ -89,8 +97,8 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: frameTexture,
 			envMap: cameraCube.renderTarget.texture,
-			metalness: 0.6,
-			roughness: 0.4,
+			metalness: 0.5,
+			roughness: 0.45,
 		});
 		this.surround.material = frameMaterial;
 
@@ -98,7 +106,7 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: photoTexture,
 			envMap: cameraCube.renderTarget.texture,
-			side: THREE.DoubleSide,
+			// side: THREE.DoubleSide,
 			metalness: 0,
 			roughness: 0,
 		});

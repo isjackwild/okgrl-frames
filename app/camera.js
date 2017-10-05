@@ -2,12 +2,13 @@ const THREE = require('three');
 export let camera, cameraCube, visWidth = 0, visHeight = 0;
 
 export const init = () => {
-	camera = new THREE.PerspectiveCamera(45, window.app.width / window.app.height, 1, 10000);
+	camera = new THREE.PerspectiveCamera(45, window.app.width / window.app.height, 100, 500);
 	camera.position.z = -300;
+
 	onResize(window.innerWidth, window.innerHeight);
 
 
-	cameraCube = new THREE.CubeCamera(1, 5000, 800);
+	cameraCube = new THREE.CubeCamera(1, 200, 800);
 	cameraCube.children.forEach(c => {
 		c.fov = 90;
 		c.updateProjectionMatrix();
