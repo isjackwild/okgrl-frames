@@ -17,8 +17,6 @@ let touchDiff = 0;
 let touchCurrent = 0;
 let touchLast = 0;
 
-
-
 export const init = (framesObjects) => {
 	window.addEventListener('mousewheel', onMouseWheel);
 	window.addEventListener('touchstart', onTouchStart);

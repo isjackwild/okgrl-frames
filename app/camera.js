@@ -2,7 +2,7 @@ const THREE = require('three');
 export let camera, cameraCube, visWidth = 0, visHeight = 0;
 
 export const init = () => {
-	camera = new THREE.PerspectiveCamera(45, window.app.width / window.app.height, 100, 500);
+	camera = new THREE.PerspectiveCamera(45, window.app.width / window.app.height, 10, 500);
 	camera.position.z = -300;
 
 	onResize(window.innerWidth, window.innerHeight);

@@ -28,10 +28,8 @@ class Frame extends THREE.Object3D {
 		this.getObjectByName("FRAME").add(this.surround);
 
 
-
-
-		this._renderOrder = renderOrder;
-		this.renderOrder = renderOrder;
+		this._renderOrder = Math.abs(Math.round(position.z));
+		console.log(this._renderOrder);
 
 		this.index = index;
 		this.position.copy(position);
@@ -97,20 +95,26 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: frameTexture,
 			envMap: cameraCube.renderTarget.texture,
-			metalness: 0.5,
-			roughness: 0.45,
+			metalness: 0.6,
+			roughness: 0.66,
+			transparent: true,
+			depthWrite: false,
 		});
 		this.surround.material = frameMaterial;
+		this.surround.renderOrder = this._renderOrder + 1;
 
 		const photoMaterial = new THREE.MeshStandardMaterial({
 			color: 0xffffff,
 			map: photoTexture,
 			envMap: cameraCube.renderTarget.texture,
 			// side: THREE.DoubleSide,
-			metalness: 0,
-			roughness: 0,
+			depthWrite: false,
+			metalness: 0.1,
+			roughness: 0.2,
+			transparent: true,
 		});
 		this.plane.material = photoMaterial;
+		this.plane.renderOrder = this._renderOrder;
 	}
 
 	setupShadow() {
@@ -121,6 +125,7 @@ class Frame extends THREE.Object3D {
 			// color: 0xff0000,
 			transparent: true,
 			// wireframe: true,
+			depthTest: false,
 			depthWrite: false,
 			opacity: .6,
 			fog: false,
@@ -128,7 +133,7 @@ class Frame extends THREE.Object3D {
 		const mesh = new THREE.Mesh(geom, material);
 		mesh.position.x = this.width * -0.05;
 		mesh.position.y = this.width * -0.08;
-		mesh.renderOrder = -1;
+		mesh.renderOrder = this._renderOrder - 1;
 		this.shadow = mesh;
 		this.add(this.shadow);
 	}
@@ -152,10 +157,10 @@ class Frame extends THREE.Object3D {
 		this.width = visWidth > visHeight ? visWidth * 0.35 : visWidth * 0.45;
 		this.height = this.width * this.aspectRatio;
 	}
-	
+
 	onIntersect(intersect) {
 		if (this.isSelected || this.isAnimating) return;
-		this.tmp.copy(intersect.point).sub(this.position)
+		this.tmp.copy(intersect.point).sub(this.position);
 		this.targetOffsetPosition.copy(intersect.point).sub(this.position);
 	}
 
@@ -172,7 +177,10 @@ class Frame extends THREE.Object3D {
 		this.isSelected = true;
 		this.backupRotation.copy(this.rotation);
 		this.shadow.material.side = THREE.DoubleSide;
-		this.renderOrder = 3;
+		this.shadow.renderOrder = 98;
+		this.plane.renderOrder = 99;
+		this.surround.renderOrder = 100;
+		this.renderOrder = 999;
 
 		const dist = (this.width * 0.4) / Math.tan(Math.PI * camera.fov / 360);
 
@@ -187,7 +195,10 @@ class Frame extends THREE.Object3D {
 		this.isAnimating = true;
 		this.isSelected = false;
 		this.shadow.material.side = THREE.DoubleSide;
-		this.renderOrder = this._renderOrder;
+		this.shadow.renderOrder = this._renderOrder - 1;
+		this.plane.renderOrder = this._renderOrder + 1;
+		this.surround.renderOrder = this._renderOrder;
+		this.renderOrder = undefined;
 
 		this.targetOffsetPosition.set(0, 0, 0);
 		this.currentOffsetPosition.set(0, 0, 0);
@@ -216,17 +227,16 @@ class Frame extends THREE.Object3D {
 
 			this.tmp.copy(
 				this.tmp.copy(camera.position)
-				.add(ray.direction.normalize().multiplyScalar(200))
+				.add(ray.direction.normalize().multiplyScalar(40))
 			);
 			this.lookAtTarget.add(
 				this.tmp.sub(this.lookAtTarget)
 				.multiplyScalar(0.05)
 			);
 			this.lookAt(this.lookAtTarget);
-			
 
-			const spring = 0.025;
-			const damping = 0.92;
+			const spring = 0.0085;
+			const damping = 0.8;
 			this.positionOffsetVelocity.add(
 				this.tmp.copy(this.targetOffsetPosition)
 				.sub(this.currentOffsetPosition)
@@ -245,10 +255,8 @@ class Frame extends THREE.Object3D {
 			this.reposition();
 
 		this.acc.set(0, 0, 0);
-	} 
+	}
 }
 
 export default Frame;
-
-
 
