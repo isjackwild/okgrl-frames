@@ -112,6 +112,7 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: frameTexture,
 			envMap: cameraCube.renderTarget.texture,
+			envMapIntensity: 0.35,
 			metalness: 0.6,
 			roughness: 0.66,
 			transparent: true,
@@ -196,7 +197,7 @@ class Frame extends THREE.Object3D {
 		this.isSelected = true;
 		this.backupRotation.copy(this.rotation);
 		this.shadow.material.side = THREE.DoubleSide;
-		this.surround.material.side = THREE.DoubleSide;
+		// this.surround.material.side = THREE.DoubleSide;
 		this.shadow.renderOrder = 98;
 		this.plane.renderOrder = 99;
 		this.surround.renderOrder = 100;
@@ -204,11 +205,18 @@ class Frame extends THREE.Object3D {
 
 		console.log(this.rotation);
 
-		const dist = (Math.max(this.height, this.width) * 0.4) / Math.tan(Math.PI * camera.fov / 360);
+		const dist = (Math.max(this.height, this.width) * 0.36) / Math.tan(Math.PI * camera.fov / 360);
 
-		TweenLite.to(this.position, 1.5, { x: 0, y: 0, z: -250 + dist, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
-		TweenLite.to(this.rotation, 1.5, { x: 0, y: 0, z: 0, ease: Elastic.easeOut.config(0.9, 0.5) });
-		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: -250, ease: Power4.easeOut });
+		const { x, y, z } = (() => {
+			const rand = Math.random();
+			if (rand > 0.66) return { x: Math.PI * 2, y: 0, z: 0 };
+			if (rand > 0.33) return { x: 0, y: Math.PI * 2, z: 0 };
+			return { x: 0, y: 0, z: Math.PI * 2 };
+		})();
+
+		TweenLite.to(this.position, 1.5, { x: 0, y: 0, z: 250 - dist, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
+		TweenLite.to(this.rotation, 1.5, { x, y, z, ease: Elastic.easeOut.config(0.9, 0.5) });
+		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: 250, ease: Power4.easeOut });
 		TweenLite.to(this.shadow.material, 0.5, { opacity: 0, ease: Power4.easeOut });
 	}
 
@@ -228,7 +236,7 @@ class Frame extends THREE.Object3D {
 
 		TweenLite.to(this.position, 1.5, { ...this.restPosition, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
 		TweenLite.to(this.rotation, 1.5, { ...this.backupRotation, ease: Elastic.easeOut.config(0.9, 0.5) });
-		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: -300, ease: Power4.easeOut });
+		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: 300, ease: Power4.easeOut });
 		TweenLite.to(this.shadow.material, 0.5, { opacity: 0.3, ease: Power4.easeOut });
 	}
 
