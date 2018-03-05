@@ -70,5 +70,7 @@ export const convertToRange = (value, srcRange, dstRange) => {
 /*
  * Oscilates between 1 and -1, given an input, i
  */
-export const osc = ( i ) => return ( Math.floor( i ) % 2 === 0 ) ? i % 1 - 0.5 : 1 - ( i % 1 ) -0.5;
+export const osc = ( i ) => {
+    return ( Math.floor( i ) % 2 === 0 ) ? i % 1 - 0.5 : 1 - ( i % 1 ) -0.5;
+};
 

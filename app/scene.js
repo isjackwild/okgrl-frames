@@ -1,11 +1,12 @@
 const THREE = require('three');
 import _ from 'lodash';
 
-export let scene, hdrScene, boxMesh;
-import { camera, visWidth, visHeight } from './camera.js';
+export let scene, plaqueScene, hdrScene, boxMesh, plaqueLight, plaque;
+import { camera, cameraCube, cameraCubePlaque, visWidth, visHeight } from './camera.js';
 import { intersectableObjects } from './input-handler.js';
 import Frame from './Frame.js';
 import { WIND_Y_VELOCITY, FRAMES_COUNT, HDR_SRC } from './CONSTANTS.js';
+import { convertToRange } from './lib/maths';
 
 const frames = [];
 
@@ -22,8 +23,11 @@ export const init = (framesObjects) => {
 	window.addEventListener('touchstart', onTouchStart);
 	window.addEventListener('touchend', onTouchEnd);
 	window.addEventListener('touchmove', onTouchMove);
+	
 	hdrScene = new THREE.Scene();
 	scene = new THREE.Scene();
+	plaqueScene = new THREE.Scene();
+
 	scene.add(camera);
 	scene.add(new THREE.AmbientLight( 0xffffff, 0.5 ));
 	const spot = new THREE.SpotLight(0xffffff, 0.8);
@@ -38,6 +42,38 @@ export const init = (framesObjects) => {
 	hdrScene.add(skybox);
 	hdrScene.add(new THREE.AmbientLight( 0xffffff ));
 
+	const plaqueLight = new THREE.SpotLight(0xffffff, 0.1);
+	plaqueLight.penumbra = 1;
+	plaqueLight.angle = 1.05;
+	plaqueLight.position.set(0, 250, -10000);
+	plaqueScene.add(plaqueLight);
+	plaqueScene.add(new THREE.AmbientLight( 0xffffff, 0.3 ));
+	const directionalLight = new THREE.PointLight( 0xffffff, 0.15, 0, 2 );
+	directionalLight.position.copy(camera.position);
+	directionalLight.position.z = -10000;
+	directionalLight.position.y = -100;
+	// directionalLight.target.position.set(0, 0, 0);
+	plaqueScene.add(directionalLight);
+	plaque = new THREE.Mesh(
+		new THREE.BoxGeometry(300 * 0.66, 90 * 0.66, 5),
+		new THREE.MeshStandardMaterial({
+			color: 0xd6c962,
+			map: new THREE.TextureLoader().load('assets/maps/plaque--map.jpg'),
+			bumpMap: new THREE.TextureLoader().load('assets/maps/plaque--map.jpg'),
+			bumpScale: 2,
+			metalnessMap: new THREE.TextureLoader().load('assets/maps/plaque--map.jpg'),
+			roughnessMap: new THREE.TextureLoader().load('assets/maps/plaque--roughness-map.jpg'),
+			envMap: cameraCubePlaque.renderTarget.texture,
+			envMapIntensity: 0.8,
+			side: THREE.DoubleSide,
+			metalness: 0.85,
+			roughness: 0.95,
+			transparent: true,
+			depthWrite: false,
+		}),
+	);
+	plaqueScene.add(plaque);
+	cameraCubePlaque.position.copy(plaque.position);
 
 	for (let i = 0; i < FRAMES_COUNT; i++) {
 		let x = Math.random() * visWidth * 0.5;
@@ -48,11 +84,25 @@ export const init = (framesObjects) => {
 
 		const model = framesObjects[Math.floor(Math.random() * framesObjects.length)];
 		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i, model, renderOrder });
-		f.lookAt(camera.position);
+		// f.lookAt(camera.position);
 		frames.push(f);
 		intersectableObjects.push(f.inputListener);
 		scene.add(f);
 	}
+
+	scene.add(cameraCubePlaque);
+
+	window.addEventListener('mousemove', ({ clientX, clientY }) => {
+		const posX = convertToRange(clientX, [0, window.innerWidth], [-190, 190]);
+		const posY = convertToRange(clientY, [0, window.innerHeight], [50, -50]);
+		plaqueLight.position.x = posX;
+		plaqueLight.position.y = posY;
+
+		const rotX = convertToRange(clientY, [0, window.innerHeight], [-0.1, 0.1]);
+		const rotY = convertToRange(clientX, [0, window.innerWidth], [-0.075, 0.075]);
+		plaque.rotation.x = rotX;
+		plaque.rotation.y = rotY;
+	});
 }
 
 const onMouseWheel = _.throttle((e) => {
@@ -101,5 +151,7 @@ export const update = (correction) => {
 	});
 	SCROLL.set(0, 0, 0);
 	debounceTouchMove = false;
+	plaque.material.needsUpdate = true;
+	plaque.material.envMap.needsUpdate = true;
 	if (doEaseTouchMove) doEaseTouchMove();
 }

@@ -10,22 +10,36 @@ class Frame extends THREE.Object3D {
 		const { position, index, model, photo, aspectRatio, renderOrder } = args;
 
 		this.frame = new THREE.Object3D();
+		this.frame.name = "FRAME_AND_PLANE";
 		this.add(this.frame);
-		model.forEach(f => {
-			this.frame.add(f.clone())
+		model.forEach(c => {
+			const copy = c.children[0].clone();
+			copy.name = c.name;
+			// copy.geometry.normalize();
+			const bufferGeom = new THREE.BufferGeometry().fromGeometry(copy.geometry);
+			copy.geometry = bufferGeom;
+			this.frame.add(copy);
 		});
 
+
 		// this.aspectRatio = aspectRatio;
+		console.log(this.frame);
 
-		this.aspectRatio = 0.6866;
 
-		this.plane = this.getObjectByName("PLANE").children[0];
-		const surround = this.getObjectByName("FRAME").children[0];
+		this.plane = this.getObjectByName("PLANE");
+		this.surround = this.getObjectByName("FRAME");
 
-		this.getObjectByName("FRAME").remove(surround);
-		const bufferGeom = new THREE.BufferGeometry().fromGeometry(surround.geometry);
-		this.surround = new THREE.Mesh(bufferGeom, surround.material);
-		this.getObjectByName("FRAME").add(this.surround);
+		this.surround.geometry.computeBoundingBox();
+		console.log(this.surround.geometry.boundingBox.size());
+		const size = this.surround.geometry.boundingBox.size();
+		this.boxSize = size;
+		this.aspectRatio = size.y / size.x;
+		console.log(aspectRatio);
+
+		// this.getObjectByName("FRAME").remove(surround);
+		// const bufferGeom = new THREE.BufferGeometry().fromGeometry(surround.geometry);
+		// this.surround = new THREE.Mesh(bufferGeom, surround.material);
+		// this.getObjectByName("FRAME").add(this.surround);
 
 
 		this._renderOrder = Math.abs(Math.round(position.z));
@@ -72,12 +86,15 @@ class Frame extends THREE.Object3D {
 		this.onResize();
 		this.setupFrame();
 		this.setupShadow();
+
+		console.log(this);
 	}
 
 	setupFrame() {
 		const geom = new THREE.BoxGeometry(this.width, this.height, 5);
 		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true, visible: false });
 		const mesh = new THREE.Mesh(geom, material);
+		mesh.name = "INPUT_LISTENER";
 		mesh.onClick = this.onClick;
 		mesh.onFocus = this.onFocus;
 		mesh.onBlur = this.onBlur;
@@ -89,7 +106,7 @@ class Frame extends THREE.Object3D {
 
 		this.add(mesh);
 		this.frame.scale.set(this.width, this.width, this.width);
-		this.frame.rotation.z = Math.PI / 2;
+		// this.frame.rotation.z = Math.PI / 2;
 
 		const frameMaterial = new THREE.MeshStandardMaterial({
 			color: 0xffffff,
@@ -107,7 +124,8 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: photoTexture,
 			envMap: cameraCube.renderTarget.texture,
-			// side: THREE.DoubleSide,
+			envMapIntensity: 0.35,
+			side: THREE.DoubleSide,
 			depthWrite: false,
 			metalness: 0.1,
 			roughness: 0.2,
@@ -118,7 +136,7 @@ class Frame extends THREE.Object3D {
 	}
 
 	setupShadow() {
-		const geom = new THREE.PlaneGeometry(this.width * 1.1, this.height * 1.1, 1);
+		const geom = new THREE.PlaneGeometry(this.boxSize.x * this.width * 1.1, this.boxSize.y * this.width * 1.1, 1);
 		const texture = new THREE.TextureLoader().load('assets/shadow.png');
 		const material = new THREE.MeshBasicMaterial({
 			map: texture,
@@ -131,6 +149,7 @@ class Frame extends THREE.Object3D {
 			fog: false,
 		});
 		const mesh = new THREE.Mesh(geom, material);
+		mesh.name = "SHADOW";
 		mesh.position.x = this.width * -0.05;
 		mesh.position.y = this.width * -0.08;
 		mesh.renderOrder = this._renderOrder - 1;
@@ -177,15 +196,18 @@ class Frame extends THREE.Object3D {
 		this.isSelected = true;
 		this.backupRotation.copy(this.rotation);
 		this.shadow.material.side = THREE.DoubleSide;
+		this.surround.material.side = THREE.DoubleSide;
 		this.shadow.renderOrder = 98;
 		this.plane.renderOrder = 99;
 		this.surround.renderOrder = 100;
 		this.renderOrder = 999;
 
-		const dist = (this.width * 0.4) / Math.tan(Math.PI * camera.fov / 360);
+		console.log(this.rotation);
+
+		const dist = (Math.max(this.height, this.width) * 0.4) / Math.tan(Math.PI * camera.fov / 360);
 
 		TweenLite.to(this.position, 1.5, { x: 0, y: 0, z: -250 + dist, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
-		TweenLite.to(this.rotation, 1.5, { x: Math.PI, y: 0, z: 0, ease: Elastic.easeOut.config(0.9, 0.5) });
+		TweenLite.to(this.rotation, 1.5, { x: 0, y: 0, z: 0, ease: Elastic.easeOut.config(0.9, 0.5) });
 		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: -250, ease: Power4.easeOut });
 		TweenLite.to(this.shadow.material, 0.5, { opacity: 0, ease: Power4.easeOut });
 	}
@@ -213,6 +235,7 @@ class Frame extends THREE.Object3D {
 	onAnimationComplete() {
 		this.isAnimating = false;
 		this.shadow.material.side = THREE.FrontSide;
+		// this.surround.material.side = THREE.FrontSide;
 	}
 
 	reposition() {
