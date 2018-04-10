@@ -5,7 +5,7 @@ export let scene, plaqueScene, hdrScene, boxMesh, plaqueLight, plaque;
 import { camera, cameraCube, cameraCubePlaque, visWidth, visHeight } from './camera.js';
 import { intersectableObjects } from './input-handler.js';
 import Frame from './Frame.js';
-import { WIND_Y_VELOCITY, FRAMES_COUNT, HDR_SRC } from './CONSTANTS.js';
+import { WIND_Y_VELOCITY, SPREAD_X, SPREAD_Y, FRAMES_COUNT, HDR_SRC } from './CONSTANTS.js';
 import { convertToRange } from './lib/maths';
 
 const frames = [];
@@ -18,7 +18,8 @@ let touchDiff = 0;
 let touchCurrent = 0;
 let touchLast = 0;
 
-export const init = (framesObjects) => {
+export const init = () => {
+	console.log(window.app);
 	window.addEventListener('mousewheel', onMouseWheel);
 	window.addEventListener('touchstart', onTouchStart);
 	window.addEventListener('touchend', onTouchEnd);
@@ -76,14 +77,15 @@ export const init = (framesObjects) => {
 	cameraCubePlaque.position.copy(plaque.position);
 
 	for (let i = 0; i < FRAMES_COUNT; i++) {
-		let x = Math.random() * visWidth * 0.6;
-		if (i % 2 === 0) x -= visWidth * 0.6;
-		const y = (i * visHeight * 2.5 / FRAMES_COUNT) - (visHeight * 2.5 * 0.5);
+		let x = Math.random() * visWidth * SPREAD_X;
+		if (i % 2 === 0) x -= visWidth * SPREAD_X;
+
+		const y = (i * visHeight * SPREAD_Y / FRAMES_COUNT) - (visHeight * SPREAD_Y * 0.5);
 		const z = i % 2 ? -30 - Math.random() * 15 : 0 - Math.random() * 15;
 		const renderOrder = i % 2 ? 1 : 2;
 
-		const model = framesObjects[Math.floor(Math.random() * framesObjects.length)];
-		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i, model, renderOrder });
+		// const model = window.app.loadedAssets.frames[0];
+		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i, renderOrder });
 		// f.lookAt(camera.position);
 		frames.push(f);
 		intersectableObjects.push(f.inputListener);

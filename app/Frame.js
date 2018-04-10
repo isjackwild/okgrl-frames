@@ -2,18 +2,18 @@ const THREE = require('three');
 import { TweenLite } from 'gsap';
 import { camera, cameraCube, visWidth, visHeight } from './camera.js';
 import { ray } from './input-handler.js';
-import { FRAME_SRCS, PHOTO_SRCS } from './CONSTANTS.js';
+import { FRAME_SRCS, SPREAD_X, SPREAD_Y, PHOTO_SRCS } from './CONSTANTS.js';
 
 const TOP_RENDER_ORDER = 99999;
 class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
-		const { position, index, model, photo, aspectRatio, renderOrder } = args;
+		const { position, index, photo, aspectRatio, renderOrder } = args;
 		this.index = index;
 		this.frame = new THREE.Object3D();
 		this.frame.name = "FRAME_AND_PLANE";
 		this.add(this.frame);
-		model.forEach(c => {
+		window.app.loadedAssets.frames[0].forEach(c => {
 			const copy = c.children[0].clone();
 			copy.name = c.name;
 			// copy.geometry.normalize();
@@ -101,8 +101,8 @@ class Frame extends THREE.Object3D {
 		mesh.onIntersect = this.onIntersect;
 		this.inputListener = mesh;
 
-		const frameTexture = new THREE.TextureLoader().load(FRAME_SRCS[0]);
-		const photoTexture = new THREE.TextureLoader().load(PHOTO_SRCS[this.index].src);
+		const frameTexture = window.app.loadedAssets.frameTextures[0];
+		const photoTexture = window.app.loadedAssets.imageTextures[this.index];
 
 		this.add(mesh);
 		this.frame.scale.set(this.width, this.width, this.width);
@@ -111,6 +111,8 @@ class Frame extends THREE.Object3D {
 		const frameMaterial = new THREE.MeshStandardMaterial({
 			color: 0xffffff,
 			map: frameTexture,
+			bumpMap: frameTexture,
+			bumpScale: 0.06,
 			envMap: cameraCube.renderTarget.texture,
 			envMapIntensity: 0.4,
 			metalness: 0.45,
@@ -242,9 +244,9 @@ class Frame extends THREE.Object3D {
 	}
 
 	reposition() {
-		this.restPosition.y *= (-1 - (Math.random() * 0.2));
-		this.restPosition.x = Math.random() * visWidth * 0.6;
-		if (this.index % 2 === 0) this.restPosition.x -= visWidth * 0.6;
+		this.restPosition.y *= -1;
+		this.restPosition.x = Math.random() * visWidth * SPREAD_X;
+		if (this.index % 2 === 0) this.restPosition.x -= visWidth * SPREAD_X;
 	}
 
 	update(correction) {

@@ -1,4 +1,6 @@
 export const FRAMES_COUNT = 9;
+export const SPREAD_X = 0.6;
+export const SPREAD_Y = 2;
 
 export const WIND = { x: 0, y: 0, z: 0 };
 export const WIND_Y_VELOCITY = 0.1;
@@ -8,7 +10,7 @@ export const GEOM_SRCS = [
 ];
 
 export const FRAME_SRCS = [
-	'assets/frames/test/Rm_4.jpg',
+	'assets/frames/test/Rm_4--01.jpg',
 ];
 
 // export const PHOTO_SRCS = [

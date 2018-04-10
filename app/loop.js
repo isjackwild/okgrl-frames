@@ -8,11 +8,11 @@ let raf, then, now, correction, isFocused = true, isInit = false, isAnimating = 
 let currentCamera, currentScene;
 export let renderer;
 
-export const init = (frames) => {
+export const init = () => {
 	canvas = document.getElementsByClassName('canvas')[0];
 	setupRenderer();
 	initCamera();
-	initScene(frames);
+	initScene();
 	initInputHandler();
 	window.addEventListener('focus', onFocus);
 	window.addEventListener('blur', onBlur);
