@@ -9,7 +9,7 @@ class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
 		const { position, index, model, photo, aspectRatio, renderOrder } = args;
-
+		this.index = index;
 		this.frame = new THREE.Object3D();
 		this.frame.name = "FRAME_AND_PLANE";
 		this.add(this.frame);
@@ -18,6 +18,16 @@ class Frame extends THREE.Object3D {
 			copy.name = c.name;
 			// copy.geometry.normalize();
 			const bufferGeom = new THREE.BufferGeometry().fromGeometry(copy.geometry);
+
+			if (PHOTO_SRCS[this.index].orientation === 'l') {
+				bufferGeom.rotateZ(Math.PI * 0.5);
+				bufferGeom.attributes.uv.setXY( 0, 0, 0.0 );
+				bufferGeom.attributes.uv.setXY( 1, 1.0, 0.0 );
+
+				bufferGeom.attributes.uv.setXY( 2, 0.0, 1.0 );
+				bufferGeom.attributes.uv.setXY( 3, 1.0, 0.0 );
+			}
+
 			copy.geometry = bufferGeom;
 			this.frame.add(copy);
 		});
@@ -38,7 +48,6 @@ class Frame extends THREE.Object3D {
 
 		this._renderOrder = Math.abs(Math.round(position.z * 100));
 
-		this.index = index;
 		this.position.copy(position);
 		this.restPosition = new THREE.Vector3().copy(position);
 		
@@ -93,7 +102,7 @@ class Frame extends THREE.Object3D {
 		this.inputListener = mesh;
 
 		const frameTexture = new THREE.TextureLoader().load(FRAME_SRCS[0]);
-		const photoTexture = new THREE.TextureLoader().load(PHOTO_SRCS[this.index]);
+		const photoTexture = new THREE.TextureLoader().load(PHOTO_SRCS[this.index].src);
 
 		this.add(mesh);
 		this.frame.scale.set(this.width, this.width, this.width);
@@ -103,9 +112,9 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: frameTexture,
 			envMap: cameraCube.renderTarget.texture,
-			envMapIntensity: 0.35,
-			metalness: 0.6,
-			roughness: 0.66,
+			envMapIntensity: 0.4,
+			metalness: 0.45,
+			roughness: 0.4,
 			transparent: true,
 			depthWrite: false,
 		});
@@ -116,7 +125,7 @@ class Frame extends THREE.Object3D {
 			color: 0xffffff,
 			map: photoTexture,
 			envMap: cameraCube.renderTarget.texture,
-			envMapIntensity: 0.35,
+			envMapIntensity: 0.4,
 			side: THREE.DoubleSide,
 			depthWrite: false,
 			metalness: 0.1,
@@ -163,7 +172,7 @@ class Frame extends THREE.Object3D {
 	}
 
 	onResize() {
-		this.width = visWidth > visHeight ? visWidth * 0.35 : visWidth * 0.45;
+		this.width = visWidth > visHeight ? visWidth * 0.45 : visWidth * 0.55;
 		this.height = this.width * this.aspectRatio;
 	}
 
@@ -233,9 +242,9 @@ class Frame extends THREE.Object3D {
 	}
 
 	reposition() {
-		this.restPosition.y *= (-1 - (Math.random() * 0.5));
-		this.restPosition.x = Math.random() * visWidth * 0.5;
-		if (this.index % 2 === 0) this.restPosition.x -= visWidth * 0.5;
+		this.restPosition.y *= (-1 - (Math.random() * 0.2));
+		this.restPosition.x = Math.random() * visWidth * 0.6;
+		if (this.index % 2 === 0) this.restPosition.x -= visWidth * 0.6;
 	}
 
 	update(correction) {
@@ -268,8 +277,10 @@ class Frame extends THREE.Object3D {
 			this.position.copy(this.restPosition).add(this.currentOffsetPosition);
 		}
 
-		if (this.acc.y > 0 && this.restPosition.y > visHeight * 0.5 + this.height || this.acc.y < 0 && this.restPosition.y < visHeight * -0.5 - this.height)
-			this.reposition();
+		if (this.acc.y > 0 && this.restPosition.y > visHeight * 2
+			||
+			this.acc.y < 0 && this.restPosition.y < visHeight * -2
+		) this.reposition();
 
 		this.acc.set(0, 0, 0);
 	}

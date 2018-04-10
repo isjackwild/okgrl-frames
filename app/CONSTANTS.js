@@ -11,16 +11,55 @@ export const FRAME_SRCS = [
 	'assets/frames/test/Rm_4.jpg',
 ];
 
+// export const PHOTO_SRCS = [
+// 	'assets/images/arvida-0.jpg',
+// 	'assets/images/arvida-1.jpg',
+// 	'assets/images/arvida-2.jpg',
+// 	'assets/images/arvida-3.jpg',
+// 	'assets/images/arvida-4.jpg',
+// 	'assets/images/arvida-5.jpg',
+// 	'assets/images/arvida-6.jpg',
+// 	'assets/images/arvida-7.jpg',
+// 	'assets/images/arvida-8.jpg',
+// ];
+
 export const PHOTO_SRCS = [
-	'assets/images/arvida-0.jpg',
-	'assets/images/arvida-1.jpg',
-	'assets/images/arvida-2.jpg',
-	'assets/images/arvida-3.jpg',
-	'assets/images/arvida-4.jpg',
-	'assets/images/arvida-5.jpg',
-	'assets/images/arvida-6.jpg',
-	'assets/images/arvida-7.jpg',
-	'assets/images/arvida-8.jpg',
+	{
+		src: 'assets/images/arvida-0.jpg',
+		orientation: 'p',
+	},
+	{
+		src: 'assets/images/arvida-1.jpg',
+		orientation: 'l',
+	},
+	{
+		src: 'assets/images/arvida-2.jpg',
+		orientation: 'l',
+	},
+	{
+		src: 'assets/images/arvida-3.jpg',
+		orientation: 'p',
+	},
+	{
+		src: 'assets/images/arvida-4.jpg',
+		orientation: 'l',
+	},
+	{
+		src: 'assets/images/arvida-5.jpg',
+		orientation: 'l',
+	},
+	{
+		src: 'assets/images/arvida-6.jpg',
+		orientation: 'p',
+	},
+	{
+		src: 'assets/images/arvida-7.jpg',
+		orientation: 'p',
+	},
+	{
+		src: 'assets/images/arvida-8.jpg',
+		orientation: 'p',
+	},
 ];
 
 export const HDR_SRC = 'assets/HDR.jpg';

@@ -29,8 +29,8 @@ export const init = (framesObjects) => {
 	plaqueScene = new THREE.Scene();
 
 	scene.add(camera);
-	scene.add(new THREE.AmbientLight( 0xffffff, 0.3 ));
-	const spot = new THREE.SpotLight(0xffffff, 0.8);
+	scene.add(new THREE.AmbientLight( 0xffffff, 0.33 ));
+	const spot = new THREE.SpotLight(0xffffff, 0.66);
 	spot.position.set(visWidth * 0.4, visHeight * 1.2, camera.position.z);
 	scene.add(spot);
 
@@ -76,9 +76,9 @@ export const init = (framesObjects) => {
 	cameraCubePlaque.position.copy(plaque.position);
 
 	for (let i = 0; i < FRAMES_COUNT; i++) {
-		let x = Math.random() * visWidth * 0.5;
-		if (i % 2 === 0) x -= visWidth * 0.5;
-		const y = (i * visHeight * 1.6 / FRAMES_COUNT) - (visHeight * 1.6 * 0.5);
+		let x = Math.random() * visWidth * 0.6;
+		if (i % 2 === 0) x -= visWidth * 0.6;
+		const y = (i * visHeight * 2.5 / FRAMES_COUNT) - (visHeight * 2.5 * 0.5);
 		const z = i % 2 ? -30 - Math.random() * 15 : 0 - Math.random() * 15;
 		const renderOrder = i % 2 ? 1 : 2;
 
