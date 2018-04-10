@@ -1,4 +1,4 @@
-export const FRAMES_COUNT = 6;
+export const FRAMES_COUNT = 9;
 
 export const WIND = { x: 0, y: 0, z: 0 };
 export const WIND_Y_VELOCITY = 0.1;
@@ -12,7 +12,15 @@ export const FRAME_SRCS = [
 ];
 
 export const PHOTO_SRCS = [
-	'assets/images/test/test-4.jpg',
+	'assets/images/arvida-0.jpg',
+	'assets/images/arvida-1.jpg',
+	'assets/images/arvida-2.jpg',
+	'assets/images/arvida-3.jpg',
+	'assets/images/arvida-4.jpg',
+	'assets/images/arvida-5.jpg',
+	'assets/images/arvida-6.jpg',
+	'assets/images/arvida-7.jpg',
+	'assets/images/arvida-8.jpg',
 ];
 
 export const HDR_SRC = 'assets/HDR.jpg';

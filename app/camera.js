@@ -3,6 +3,7 @@ export let camera, cameraPlaque, cameraCube, cameraCubePlaque, visWidth = 0, vis
 
 export const init = () => {
 	camera = new THREE.PerspectiveCamera(45, window.app.width / window.app.height, 10, 500);
+	camera.setFocalLength(80);
 	camera.position.z = 300;
 	
 	cameraPlaque = new THREE.PerspectiveCamera();

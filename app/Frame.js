@@ -4,6 +4,7 @@ import { camera, cameraCube, visWidth, visHeight } from './camera.js';
 import { ray } from './input-handler.js';
 import { FRAME_SRCS, PHOTO_SRCS } from './CONSTANTS.js';
 
+const TOP_RENDER_ORDER = 99999;
 class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
@@ -21,20 +22,13 @@ class Frame extends THREE.Object3D {
 			this.frame.add(copy);
 		});
 
-
-		// this.aspectRatio = aspectRatio;
-		console.log(this.frame);
-
-
 		this.plane = this.getObjectByName("PLANE");
 		this.surround = this.getObjectByName("FRAME");
 
 		this.surround.geometry.computeBoundingBox();
-		console.log(this.surround.geometry.boundingBox.size());
 		const size = this.surround.geometry.boundingBox.size();
 		this.boxSize = size;
 		this.aspectRatio = size.y / size.x;
-		console.log(aspectRatio);
 
 		// this.getObjectByName("FRAME").remove(surround);
 		// const bufferGeom = new THREE.BufferGeometry().fromGeometry(surround.geometry);
@@ -42,8 +36,7 @@ class Frame extends THREE.Object3D {
 		// this.getObjectByName("FRAME").add(this.surround);
 
 
-		this._renderOrder = Math.abs(Math.round(position.z));
-		console.log(this._renderOrder);
+		this._renderOrder = Math.abs(Math.round(position.z * 100));
 
 		this.index = index;
 		this.position.copy(position);
@@ -85,9 +78,7 @@ class Frame extends THREE.Object3D {
 
 		this.onResize();
 		this.setupFrame();
-		this.setupShadow();
-
-		console.log(this);
+		// this.setupShadow();
 	}
 
 	setupFrame() {
@@ -102,7 +93,7 @@ class Frame extends THREE.Object3D {
 		this.inputListener = mesh;
 
 		const frameTexture = new THREE.TextureLoader().load(FRAME_SRCS[0]);
-		const photoTexture = new THREE.TextureLoader().load(PHOTO_SRCS[0]);
+		const photoTexture = new THREE.TextureLoader().load(PHOTO_SRCS[this.index]);
 
 		this.add(mesh);
 		this.frame.scale.set(this.width, this.width, this.width);
@@ -141,9 +132,7 @@ class Frame extends THREE.Object3D {
 		const texture = new THREE.TextureLoader().load('assets/shadow.png');
 		const material = new THREE.MeshBasicMaterial({
 			map: texture,
-			// color: 0xff0000,
 			transparent: true,
-			// wireframe: true,
 			depthTest: false,
 			depthWrite: false,
 			opacity: .6,
@@ -196,14 +185,11 @@ class Frame extends THREE.Object3D {
 		this.isAnimating = true;
 		this.isSelected = true;
 		this.backupRotation.copy(this.rotation);
-		this.shadow.material.side = THREE.DoubleSide;
-		// this.surround.material.side = THREE.DoubleSide;
-		this.shadow.renderOrder = 98;
-		this.plane.renderOrder = 99;
-		this.surround.renderOrder = 100;
-		this.renderOrder = 999;
-
-		console.log(this.rotation);
+		if (this.shadow) this.shadow.material.side = THREE.DoubleSide;
+		if (this.shadow) this.shadow.renderOrder = TOP_RENDER_ORDER - 2;
+		this.plane.renderOrder = TOP_RENDER_ORDER - 1;
+		this.surround.renderOrder = TOP_RENDER_ORDER + 1;
+		this.renderOrder = TOP_RENDER_ORDER;
 
 		const dist = (Math.max(this.height, this.width) * 0.36) / Math.tan(Math.PI * camera.fov / 360);
 
@@ -217,15 +203,15 @@ class Frame extends THREE.Object3D {
 		TweenLite.to(this.position, 1.5, { x: 0, y: 0, z: 250 - dist, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
 		TweenLite.to(this.rotation, 1.5, { x, y, z, ease: Elastic.easeOut.config(0.9, 0.5) });
 		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: 250, ease: Power4.easeOut });
-		TweenLite.to(this.shadow.material, 0.5, { opacity: 0, ease: Power4.easeOut });
+		if (this.shadow) TweenLite.to(this.shadow.material, 0.5, { opacity: 0, ease: Power4.easeOut });
 	}
 
 	unSelect() {
 		window.selectedObject = null;
 		this.isAnimating = true;
 		this.isSelected = false;
-		this.shadow.material.side = THREE.DoubleSide;
-		this.shadow.renderOrder = this._renderOrder - 1;
+		if (this.shadow) this.shadow.material.side = THREE.DoubleSide;
+		if (this.shadow) this.shadow.renderOrder = this._renderOrder - 1;
 		this.plane.renderOrder = this._renderOrder + 1;
 		this.surround.renderOrder = this._renderOrder;
 		this.renderOrder = undefined;
@@ -237,12 +223,12 @@ class Frame extends THREE.Object3D {
 		TweenLite.to(this.position, 1.5, { ...this.restPosition, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
 		TweenLite.to(this.rotation, 1.5, { ...this.backupRotation, ease: Elastic.easeOut.config(0.9, 0.5) });
 		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: 300, ease: Power4.easeOut });
-		TweenLite.to(this.shadow.material, 0.5, { opacity: 0.3, ease: Power4.easeOut });
+		if (this.shadow) TweenLite.to(this.shadow.material, 0.5, { opacity: 0.3, ease: Power4.easeOut });
 	}
 
 	onAnimationComplete() {
 		this.isAnimating = false;
-		this.shadow.material.side = THREE.FrontSide;
+		if (this.shadow) this.shadow.material.side = THREE.FrontSide;
 		// this.surround.material.side = THREE.FrontSide;
 	}
 

@@ -29,7 +29,7 @@ export const init = (framesObjects) => {
 	plaqueScene = new THREE.Scene();
 
 	scene.add(camera);
-	scene.add(new THREE.AmbientLight( 0xffffff, 0.5 ));
+	scene.add(new THREE.AmbientLight( 0xffffff, 0.3 ));
 	const spot = new THREE.SpotLight(0xffffff, 0.8);
 	spot.position.set(visWidth * 0.4, visHeight * 1.2, camera.position.z);
 	scene.add(spot);
