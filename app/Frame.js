@@ -9,23 +9,20 @@ class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
 		const { position, index, photo, aspectRatio, renderOrder } = args;
+		console.log(position.y);
 		this.index = index;
 		this.frame = new THREE.Object3D();
 		this.frame.name = "FRAME_AND_PLANE";
 		this.add(this.frame);
-		window.app.loadedAssets.frames[0].forEach(c => {
+		this.orientation = PHOTO_SRCS[this.index].orientation;
+		const geom = this.orientation === 'l' ? window.app.loadedAssets.frameL : window.app.loadedAssets.frameP;
+		geom.forEach(c => {
 			const copy = c.children[0].clone();
 			copy.name = c.name;
 			// copy.geometry.normalize();
 			const bufferGeom = new THREE.BufferGeometry().fromGeometry(copy.geometry);
-
 			if (PHOTO_SRCS[this.index].orientation === 'l') {
-				bufferGeom.rotateZ(Math.PI * 0.5);
-				bufferGeom.attributes.uv.setXY( 0, 0, 0.0 );
-				bufferGeom.attributes.uv.setXY( 1, 1.0, 0.0 );
-
-				bufferGeom.attributes.uv.setXY( 2, 0.0, 1.0 );
-				bufferGeom.attributes.uv.setXY( 3, 1.0, 0.0 );
+				bufferGeom.rotateZ(Math.PI * -0.5);
 			}
 
 			copy.geometry = bufferGeom;
@@ -37,6 +34,8 @@ class Frame extends THREE.Object3D {
 
 		this.surround.geometry.computeBoundingBox();
 		const size = this.surround.geometry.boundingBox.size();
+		// this.surround.scale.set(1.5, 1.5, 1.5);
+		// this.plane.scale.set(1.5, 1.5, 1.5);
 		this.boxSize = size;
 		this.aspectRatio = size.y / size.x;
 
@@ -64,7 +63,7 @@ class Frame extends THREE.Object3D {
 		this.tmp = new THREE.Vector3();
 		this.tmp2 = new THREE.Vector3();
 
-		this.mass = Math.random() * 0.3 + 0.7;
+		this.mass = 0.9 + (Math.random() * 0.1);
 		this.width = 0;
 		this.height = 0;
 
@@ -91,9 +90,16 @@ class Frame extends THREE.Object3D {
 	}
 
 	setupFrame() {
-		const geom = new THREE.BoxGeometry(this.width, this.height, 5);
-		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true, visible: false });
+		console.log(this.orientation);
+		const geom = new THREE.BoxGeometry(
+			this.orientation === 'p' ? this.width : this.height * 2,
+			this.orientation === 'p' ? this.height : this.width,
+			5
+		);
+
+		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true, visible: true });
 		const mesh = new THREE.Mesh(geom, material);
+		mesh.scale.set(0.5, 0.5, 0.5);
 		mesh.name = "INPUT_LISTENER";
 		mesh.onClick = this.onClick;
 		mesh.onFocus = this.onFocus;
@@ -174,7 +180,8 @@ class Frame extends THREE.Object3D {
 	}
 
 	onResize() {
-		this.width = visWidth > visHeight ? visWidth * 0.45 : visWidth * 0.55;
+		// this.width = visWidth > visHeight ? visWidth * 0.66 : visWidth * 0.55;
+		this.width = visWidth * 0.6;
 		this.height = this.width * this.aspectRatio;
 	}
 
@@ -279,9 +286,9 @@ class Frame extends THREE.Object3D {
 			this.position.copy(this.restPosition).add(this.currentOffsetPosition);
 		}
 
-		if (this.acc.y > 0 && this.restPosition.y > visHeight * 2
+		if (this.acc.y > 0 && this.restPosition.y > visHeight * SPREAD_Y * 0.5
 			||
-			this.acc.y < 0 && this.restPosition.y < visHeight * -2
+			this.acc.y < 0 && this.restPosition.y < visHeight * SPREAD_Y * -0.5
 		) this.reposition();
 
 		this.acc.set(0, 0, 0);

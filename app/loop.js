@@ -1,6 +1,6 @@
 const THREE = require('three');
-import { init as initScene, scene, hdrScene, plaqueScene, update as updateScene, hdrNeedsRender } from './scene.js';
-import { init as initCamera, camera, cameraPlaque, cameraCube, cameraCubePlaque, onResize as onResizeCamera } from './camera.js';
+import { init as initScene, scene, hdrScene, update as updateScene, hdrNeedsRender } from './scene.js';
+import { init as initCamera, camera, cameraCube, onResize as onResizeCamera } from './camera.js';
 import { init as initInputHandler } from './input-handler.js';
 
 let canvas;
@@ -61,11 +61,8 @@ const update = (correction) => {
 
 const render = () => {
 	currentCamera.lookAt(currentScene.position);
-	// cameraPlaque.lookAt(currentScene.position);
 
-	
 	renderer.clear();
-	// cameraCubePlaque.update(renderer, currentScene);
 
 	if (window.hdrNeedsRender) {
 		requestAnimationFrame(() => {
@@ -76,7 +73,6 @@ const render = () => {
 	}
 	
 	renderer.clear();
-	// renderer.render(plaqueScene, cameraPlaque);
 	renderer.render(currentScene, currentCamera);
 }
 
