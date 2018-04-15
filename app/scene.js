@@ -23,13 +23,15 @@ export const init = () => {
 	window.addEventListener('touchstart', onTouchStart);
 	window.addEventListener('touchend', onTouchEnd);
 	window.addEventListener('touchmove', onTouchMove);
+
+	console.log(window.app);
 	
 	hdrScene = new THREE.Scene();
 	scene = new THREE.Scene();
 
 	scene.add(camera);
 	scene.add(new THREE.AmbientLight( 0xffffff, 0.33 ));
-	scene.add(new THREE.AxesHelper(100));
+	// scene.add(new THREE.AxesHelper(100));
 	const spot = new THREE.SpotLight(0xffffff, 0.66);
 	spot.position.set(visWidth * 0.4, visHeight * 1.2, camera.position.z);
 	scene.add(spot);
@@ -57,7 +59,7 @@ export const init = () => {
 
 		const f = new Frame({ position: new THREE.Vector3(x, y, z), index: i, renderOrder });
 		frames.push(f);
-		intersectableObjects.push(f.inputListener);
+		intersectableObjects.push(f.plane);
 		scene.add(f);
 	}
 }

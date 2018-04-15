@@ -22,6 +22,7 @@ window.app.loadedAssets = {
 	imageTextures: [],
 }
 
+let imagesLoaded = false;
 
 const kickIt = () => {
 	if (window.location.search.indexOf('debug') > -1) app.debug = true;
@@ -34,18 +35,23 @@ const kickIt = () => {
 	// GEOM_SRCS.forEach(s => {
 	// 	colladaLoader.load(s, onLoadedGeom);
 	// });
-	loadingManager.onLoad = init;
+	loadingManager.onLoad = () => {
+		imagesLoaded = true;
+		if (window.app.loadedAssets.frameP && window.app.loadedAssets.frameL) init();
+	}
 
 	new THREE.ColladaLoader(loadingManager).load(GEOM_PORTRAIT, object => {
 		object.scene.name = 'PORTRAIT';
 		window.app.loadedAssets.frameP = object.scene.children;
+		if (window.app.loadedAssets.frameP && window.app.loadedAssets.frameL && imagesLoaded) init();
 	});
 	new THREE.ColladaLoader(loadingManager).load(GEOM_LANDSCAPE, object => {
 		object.scene.name = 'LANDSCAPE';
 		window.app.loadedAssets.frameL = object.scene.children;
+		if (window.app.loadedAssets.frameP && window.app.loadedAssets.frameL && imagesLoaded) init();
 	});
 	FRAME_SRCS.forEach(s => textureLoader.load(s, texture => window.app.loadedAssets.frameTextures.push(texture)));
-	PHOTO_SRCS.forEach(s => textureLoader.load(s.src, texture => window.app.loadedAssets.imageTextures.push(texture)));
+	PHOTO_SRCS.forEach((s, i) => textureLoader.load(s.src, texture => window.app.loadedAssets.imageTextures[i] = texture));
 }
 
 // const load = () => {

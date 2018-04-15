@@ -9,7 +9,6 @@ class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
 		const { position, index, photo, aspectRatio, renderOrder } = args;
-		console.log(position.y);
 		this.index = index;
 		this.frame = new THREE.Object3D();
 		this.frame.name = "FRAME_AND_PLANE";
@@ -90,27 +89,27 @@ class Frame extends THREE.Object3D {
 	}
 
 	setupFrame() {
-		console.log(this.orientation);
-		const geom = new THREE.BoxGeometry(
-			this.orientation === 'p' ? this.width : this.height * 2,
-			this.orientation === 'p' ? this.height : this.width,
-			5
-		);
+		// console.log(this.orientation);
+		// const geom = new THREE.BoxGeometry(
+		// 	this.orientation === 'p' ? this.width : this.height * 2.5,
+		// 	this.orientation === 'p' ? this.height : this.width,
+		// 	5
+		// );
 
-		const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true, visible: true });
-		const mesh = new THREE.Mesh(geom, material);
-		mesh.scale.set(0.5, 0.5, 0.5);
-		mesh.name = "INPUT_LISTENER";
-		mesh.onClick = this.onClick;
-		mesh.onFocus = this.onFocus;
-		mesh.onBlur = this.onBlur;
-		mesh.onIntersect = this.onIntersect;
-		this.inputListener = mesh;
+		// const material = new THREE.MeshBasicMaterial({ color: 0x0000ff, wireframe: true, visible: true });
+		// const mesh = new THREE.Mesh(geom, material);
+		// mesh.scale.set(0.5, 0.5, 0.5);
+		// mesh.name = "INPUT_LISTENER";
+		this.plane.onClick = this.onClick;
+		this.plane.onFocus = this.onFocus;
+		this.plane.onBlur = this.onBlur;
+		this.plane.onIntersect = this.onIntersect;
+		// this.inputListener = mesh;
 
 		const frameTexture = window.app.loadedAssets.frameTextures[0];
 		const photoTexture = window.app.loadedAssets.imageTextures[this.index];
 
-		this.add(mesh);
+		// this.add(mesh);
 		this.frame.scale.set(this.width, this.width, this.width);
 		// this.frame.rotation.z = Math.PI / 2;
 
