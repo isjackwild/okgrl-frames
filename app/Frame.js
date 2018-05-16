@@ -2,13 +2,14 @@ const THREE = require('three');
 import { TweenLite } from 'gsap';
 import { camera, cameraCube, visWidth, visHeight } from './camera.js';
 import { ray } from './input-handler.js';
-import { FRAME_SRCS, SPREAD_X, SPREAD_Y, PHOTO_SRCS } from './CONSTANTS.js';
+import { FRAME_SRCS, SPREAD_X, SPREAD_Y, SPREAD_Y_S, PHOTO_SRCS } from './CONSTANTS.js';
 
 const TOP_RENDER_ORDER = 99999;
 class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
 		const { position, index, photo, aspectRatio, renderOrder } = args;
+		console.log(position.y);
 		this.index = index;
 		this.frame = new THREE.Object3D();
 		this.frame.name = "FRAME_AND_PLANE";
@@ -52,6 +53,7 @@ class Frame extends THREE.Object3D {
 		this.currentOffsetPosition = new THREE.Vector3();
 		this.targetOffsetPosition = new THREE.Vector3();
 		this.positionOffsetVelocity = new THREE.Vector3(0, 0, 0);
+		this.randomOffsetPosition = new THREE.Vector3((Math.random() * 5) - 2.5, (Math.random() * 5) - 2.5, 0);
 		this.currentToTargetOffsetVector = new THREE.Vector3();
 
 		// this.targetRotation = new THREE.Euler();
@@ -62,7 +64,8 @@ class Frame extends THREE.Object3D {
 		this.tmp = new THREE.Vector3();
 		this.tmp2 = new THREE.Vector3();
 
-		this.mass = 0.9 + (Math.random() * 0.1);
+		// this.mass = 0.9 + (Math.random() * 0.1);
+		this.mass = 1;
 		this.width = 0;
 		this.height = 0;
 
@@ -180,7 +183,7 @@ class Frame extends THREE.Object3D {
 
 	onResize() {
 		// this.width = visWidth > visHeight ? visWidth * 0.66 : visWidth * 0.55;
-		this.width = visWidth * 0.6;
+		this.width = window.app.size === 's' ? visWidth * 0.95: visWidth * 0.6;
 		this.height = this.width * this.aspectRatio;
 	}
 
@@ -208,7 +211,7 @@ class Frame extends THREE.Object3D {
 		this.surround.renderOrder = TOP_RENDER_ORDER + 1;
 		this.renderOrder = TOP_RENDER_ORDER;
 
-		const dist = (Math.max(this.height, this.width) * 0.36) / Math.tan(Math.PI * camera.fov / 360);
+		const dist = (Math.max(this.height, this.width) * (window.app.size === 's' ? 0.8 : 0.36)) / Math.tan(Math.PI * camera.fov / 360);
 
 		const { x, y, z } = (() => {
 			const rand = Math.random();
@@ -250,15 +253,18 @@ class Frame extends THREE.Object3D {
 	}
 
 	reposition() {
+		const maxY = (visHeight * (window.app.size === 's' ? SPREAD_Y_S : SPREAD_Y) * 0.5);
+		const overflow = this.restPosition.y % maxY;
 		this.restPosition.y *= -1;
-		this.restPosition.x = Math.random() * visWidth * SPREAD_X;
-		if (this.index % 2 === 0) this.restPosition.x -= visWidth * SPREAD_X;
+		this.restPosition.y += overflow;
+		this.randomOffsetPosition = new THREE.Vector3((Math.random() * 5) - 2.5, (Math.random() * 5) - 2.5, 0);
+		// this.restPosition.x = Math.random() * visWidth * SPREAD_X;
+		// if (this.index % 2 === 0) this.restPosition.x -= visWidth * SPREAD_X;
 	}
 
 	update(correction) {
 		this.restPosition.add(this.acc.multiplyScalar(correction));
 		if (!this.isSelected && !this.isAnimating) {
-
 			this.tmp.copy(
 				this.tmp.copy(camera.position)
 				.add(ray.direction.normalize().multiplyScalar(40))
@@ -282,13 +288,13 @@ class Frame extends THREE.Object3D {
 				.multiplyScalar(damping)
 			);
 
-			this.position.copy(this.restPosition).add(this.currentOffsetPosition);
-		}
+			this.position.copy(this.restPosition).add(this.currentOffsetPosition).add(this.randomOffsetPosition);
 
-		if (this.acc.y > 0 && this.restPosition.y > visHeight * SPREAD_Y * 0.5
+			if (this.acc.y > 0 && this.restPosition.y > visHeight * (window.app.size === 's' ? SPREAD_Y_S : SPREAD_Y) * 0.5
 			||
-			this.acc.y < 0 && this.restPosition.y < visHeight * SPREAD_Y * -0.5
-		) this.reposition();
+			this.acc.y < 0 && this.restPosition.y < visHeight * (window.app.size === 's' ? SPREAD_Y_S : SPREAD_Y) * -0.5
+			) return this.reposition();
+		}
 
 		this.acc.set(0, 0, 0);
 	}

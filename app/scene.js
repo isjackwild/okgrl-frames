@@ -5,7 +5,7 @@ export let scene, hdrScene, boxMesh;
 import { camera, cameraCube, visWidth, visHeight } from './camera.js';
 import { intersectableObjects } from './input-handler.js';
 import Frame from './Frame.js';
-import { WIND_Y_VELOCITY, SPREAD_X, SPREAD_Y, FRAMES_COUNT, HDR_SRC } from './CONSTANTS.js';
+import { WIND_Y_VELOCITY, MAX_SCROLL_SPEED, SPREAD_X, SPREAD_Y, SPREAD_Y_S, FRAMES_COUNT, HDR_SRC } from './CONSTANTS.js';
 import { convertToRange } from './lib/maths';
 
 const frames = [];
@@ -53,7 +53,7 @@ export const init = () => {
 		let x = Math.random() * visWidth * SPREAD_X;
 		if (i % 2 === 0) x -= visWidth * SPREAD_X;
 
-		const y = (i * visHeight * SPREAD_Y / (FRAMES_COUNT - 1)) - (visHeight * SPREAD_Y * 0.5);
+		const y = (i * visHeight * (window.app.size === 's' ? SPREAD_Y_S : SPREAD_Y) / FRAMES_COUNT) - (visHeight * (window.app.size === 's' ? SPREAD_Y_S : SPREAD_Y) * 0.5);
 		const z = i % 2 ? -30 - Math.random() * 15 : 0 - Math.random() * 15;
 		const renderOrder = i % 2 ? 1 : 2;
 
@@ -65,7 +65,7 @@ export const init = () => {
 }
 
 const onMouseWheel = _.throttle((e) => {
-	SCROLL.y = Math.min(e.wheelDeltaY * 0.15, 40) * -1;
+	SCROLL.y = Math.min(e.wheelDeltaY * 0.15, 66) * -1;
 }, 16.666);
 
 const onTouchStart = (e) => {
@@ -86,7 +86,7 @@ const onTouchMove = _.throttle((e) => {
 
 	e.preventDefault();
 	touchCurrent = e.touches[0].clientY;
-	touchDiff = Math.min(touchLast - touchCurrent, 77);
+	touchDiff = Math.min(touchLast - touchCurrent, 66);
 	SCROLL.y = touchDiff / 2;
 
 	touchLast = touchCurrent;
@@ -103,6 +103,7 @@ const doEaseTouchMove = () => {
 
 export const update = (correction) => {
 	if (SCROLL.y < 0 && WIND.y > 0 || SCROLL.y > 0 && WIND.y < 0) WIND.y *= -1;
+	SCROLL.y = _.clamp(SCROLL.y, MAX_SCROLL_SPEED * -1, MAX_SCROLL_SPEED);
 	frames.forEach(f => {
 		f.applyForce(WIND);
 		f.applyForce(SCROLL);

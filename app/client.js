@@ -12,6 +12,7 @@ import { GEOM_LANDSCAPE, GEOM_PORTRAIT, FRAME_SRCS, PHOTO_SRCS } from './CONSTAN
 import _ from 'lodash';
 
 window.app = window.app || {};
+window.app.size = 'm';
 const loadedFrames = [];
 const loadedFrameTextures = [];
 const loadedImageTextures = [];
@@ -70,6 +71,13 @@ const onResize = () => {
 	window.app.width = window.innerWidth;
 	window.app.height = window.innerHeight;
 
+	window.app.size = (() => {
+		if ((window.app.height > window.app.width) && (window.app.width <= 768)) return 's';
+		if (window.app.width > 1900) return 'l';
+		return 'm';
+	})();
+
+	console.log(window.app.size);
 	if (renderer) renderer.setSize(window.app.width, window.app.height);
 	onResizeCamera(window.app.width, window.app.height);
 }
