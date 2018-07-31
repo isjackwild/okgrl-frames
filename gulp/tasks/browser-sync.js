@@ -8,6 +8,7 @@ gulp.task('server', function() {
 		browser: [],
 		notify: false,
 		online: false,
+		ghostMode: false,
 		logConnections: true,
 		files: [ PUBLIC_FOLDER ],
 		proxy: '127.0.0.1:4000',

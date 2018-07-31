@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "dat-gui": "^0.5.0",
+    "detect-it": "^3.0.5",
     "gsap": "^1.19.0",
     "gulp-util": "^3.0.7",
     "lodash": "^4.13.1",

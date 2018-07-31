@@ -14,18 +14,13 @@ window.selectedObject = null;
 let isActive = true;
 
 
-export const init = () => {
-	addEventListeners();
+export const init = (canvas) => {
+	addEventListeners(canvas);
 }
 
-const addEventListeners = () => {
-	if (window.mobile) {
-		window.addEventListener('deviceorientation', _.throttle(onDeviceOrientation, 33.333));
-		window.addEventListener('touchstart', onClick);
-	} else {
-		window.addEventListener('mousemove', _.throttle(onMouseMove, 16.666));
-		window.addEventListener('click', onClick);
-	}
+const addEventListeners = (canvas) => {
+	window.addEventListener('mousemove', _.throttle(onMouseMove, 16.666));
+	canvas.addEventListener('click', onClick);
 }
 
 const onMouseMove = ({ clientX, clientY }) => {

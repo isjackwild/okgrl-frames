@@ -13,7 +13,7 @@ export const init = () => {
 	setupRenderer();
 	initCamera();
 	initScene();
-	initInputHandler();
+	initInputHandler(canvas);
 	window.addEventListener('focus', onFocus);
 	window.addEventListener('blur', onBlur);
 

@@ -1,5 +1,6 @@
 const THREE = require('three');
 import _ from 'lodash';
+import detectIt from 'detect-it';
 
 export let scene, hdrScene, boxMesh;
 import { camera, cameraCube, visWidth, visHeight } from './camera.js';
@@ -19,20 +20,18 @@ let touchCurrent = 0;
 let touchLast = 0;
 
 export const init = () => {
-	window.addEventListener('mousewheel', onMouseWheel);
+	window.addEventListener('mousewheel', onMouseWheel, detectIt.passiveEvents ? {passive:true} : false);
 	window.addEventListener('touchstart', onTouchStart);
 	window.addEventListener('touchend', onTouchEnd);
 	window.addEventListener('touchmove', onTouchMove);
-
-	console.log(window.app);
 	
 	hdrScene = new THREE.Scene();
 	scene = new THREE.Scene();
 
 	scene.add(camera);
-	scene.add(new THREE.AmbientLight( 0xffffff, 0.33 ));
+	scene.add(new THREE.AmbientLight( 0xffffff, 0.6 ));
 	// scene.add(new THREE.AxesHelper(100));
-	const spot = new THREE.SpotLight(0xffffff, 0.66);
+	const spot = new THREE.SpotLight(0xffffff, 0.33);
 	spot.position.set(visWidth * 0.4, visHeight * 1.2, camera.position.z);
 	scene.add(spot);
 
@@ -65,7 +64,7 @@ export const init = () => {
 }
 
 const onMouseWheel = _.throttle((e) => {
-	SCROLL.y = Math.min(e.wheelDeltaY * 0.15, 66) * -1;
+	SCROLL.y = Math.min(e.wheelDeltaY * 0.035, 66) * -1;
 }, 16.666);
 
 const onTouchStart = (e) => {

@@ -9,7 +9,6 @@ class Frame extends THREE.Object3D {
 	constructor(args) {
 		super(args);
 		const { position, index, photo, aspectRatio, renderOrder } = args;
-		console.log(position.y);
 		this.index = index;
 		this.frame = new THREE.Object3D();
 		this.frame.name = "FRAME_AND_PLANE";
@@ -184,6 +183,7 @@ class Frame extends THREE.Object3D {
 	onResize() {
 		// this.width = visWidth > visHeight ? visWidth * 0.66 : visWidth * 0.55;
 		this.width = window.app.size === 's' ? visWidth * 0.95: visWidth * 0.6;
+		if (this.orientation === 'p' && window.app.size === 's') this.width *= 1.2
 		this.height = this.width * this.aspectRatio;
 	}
 
@@ -211,7 +211,21 @@ class Frame extends THREE.Object3D {
 		this.surround.renderOrder = TOP_RENDER_ORDER + 1;
 		this.renderOrder = TOP_RENDER_ORDER;
 
-		const dist = (Math.max(this.height, this.width) * (window.app.size === 's' ? 0.8 : 0.36)) / Math.tan(Math.PI * camera.fov / 360);
+		// const dist =
+		// 	(Math.max(this.height, this.width) *
+		// 	(window.app.size === 's' ? 0.8 : 0.36)) /
+		// 	Math.tan(Math.PI * camera.fov / 360);
+		
+		const w = this.orientation === 'l' ? this.width : this.height;
+		const h = this.orientation === 'l' ? this.h : this.width;
+		const dist = (Math.min(h, w) / 2 / Math.tan(Math.PI * camera.fov / 360)) * 1.3;
+
+
+		// const vFOV = camera.fov * Math.PI / 180;
+		// const ratio = 2 * Math.tan(vFOV / 2);
+		// const screen = ratio * (window.app.width / window.app.height);
+		// const size = Math.max(this.width, this.height);
+		// const dist = (size / screen) / 4;
 
 		const { x, y, z } = (() => {
 			const rand = Math.random();
@@ -240,7 +254,9 @@ class Frame extends THREE.Object3D {
 		this.currentOffsetPosition.set(0, 0, 0);
 		this.positionOffsetVelocity.set(0, 0, 0);
 
-		TweenLite.to(this.position, 1.5, { ...this.restPosition, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
+		const toPosition = new THREE.Vector3().copy(this.restPosition).add(this.randomOffsetPosition);
+
+		TweenLite.to(this.position, 1.5, { ...toPosition, ease: Elastic.easeOut.config(0.9, 0.5), onComplete: this.onAnimationComplete });
 		TweenLite.to(this.rotation, 1.5, { ...this.backupRotation, ease: Elastic.easeOut.config(0.9, 0.5) });
 		TweenLite.to(camera.position, 0.5, { x: 0, y: 0, z: 300, ease: Power4.easeOut });
 		if (this.shadow) TweenLite.to(this.shadow.material, 0.5, { opacity: 0.3, ease: Power4.easeOut });
@@ -248,6 +264,9 @@ class Frame extends THREE.Object3D {
 
 	onAnimationComplete() {
 		this.isAnimating = false;
+		this.targetOffsetPosition.set(0, 0, 0);
+		this.currentOffsetPosition.set(0, 0, 0);
+		this.positionOffsetVelocity.set(0, 0, 0);
 		if (this.shadow) this.shadow.material.side = THREE.FrontSide;
 		// this.surround.material.side = THREE.FrontSide;
 	}
@@ -263,8 +282,8 @@ class Frame extends THREE.Object3D {
 	}
 
 	update(correction) {
-		this.restPosition.add(this.acc.multiplyScalar(correction));
 		if (!this.isSelected && !this.isAnimating) {
+			this.restPosition.add(this.acc.multiplyScalar(correction));
 			this.tmp.copy(
 				this.tmp.copy(camera.position)
 				.add(ray.direction.normalize().multiplyScalar(40))
